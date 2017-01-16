@@ -1,0 +1,40 @@
+Playtini\Bundle\AuthBundle\Entity\User:
+    type: entity
+    table: users
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: IDENTITY
+    fields:
+        createdAt:
+            type: datetime
+            column: created_at
+            nullable: false
+        lastActiveAt:
+            type: datetime
+            column: last_active_at
+            nullable: true
+        enabled:
+            type: boolean
+            column: is_enabled
+        username:
+            type: string
+            column: username
+            length: 255
+            nullable: true
+        email:
+            type: string
+            column: email
+            length: 255
+            nullable: true
+        googleId:
+            type: string
+            column: google_id
+            length: 255
+            nullable: true
+        googleAccessToken:
+            type: string
+            column: google_access_token
+            length: 255
+            nullable: true

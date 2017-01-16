@@ -1,0 +1,29 @@
+services:
+    playtini.auth.model.user_manager:
+        class: Playtini\Bundle\AuthBundle\Model\UserManager
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - 'Playtini\Bundle\AuthBundle\Entity\User'
+
+    playtini.auth.security.google_authenticator:
+        class: Playtini\Bundle\AuthBundle\Security\GoogleAuthenticator
+        arguments:
+            - '@oauth2.registry'
+            - '@router'
+            - '%google_app_domain%'
+            - '%google_app_users%'
+            - '@playtini.auth.model.user_manager'
+
+    playtini.auth.security.api_key_user_provider:
+        class: Playtini\Bundle\AuthBundle\Security\ApiKeyUserProvider
+        arguments: [ '@doctrine.orm.entity_manager', '%google_app_id%~%google_app_secret%' ]
+    playtini.auth.security.api_key_authenticator:
+        class: Playtini\Bundle\AuthBundle\Security\ApiKeyAuthenticator
+        public: false
+
+    twig.security_extension:
+        class: Playtini\Bundle\AuthBundle\Twig\SecurityExtension
+        public: false
+        arguments: [ '@playtini.auth.security.api_key_user_provider', '@security.token_storage' ]
+        tags:
+            - { name: twig.extension }

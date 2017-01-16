@@ -1,0 +1,19 @@
+playtini_auth_security_login:
+    path: /login/google
+    defaults: { _controller: 'PlaytiniAuthBundle:Google:login' }
+
+playtini_auth_connect_google_check:
+    path: /login/check-google
+    defaults: { _controller: 'PlaytiniAuthBundle:Google:loginCheck' }
+
+playtini_auth_security_logout:
+    path: /logout
+    defaults: { _controller: 'PlaytiniAuthBundle:Google:logout' }
+
+playtini_auth_security_logout_force:
+    path: /logout/force
+    defaults: { _controller: 'PlaytiniAuthBundle:Google:forceLogout' }
+
+playtini_auth_api_key:
+    path: /api/key.json
+    defaults: { _controller: 'PlaytiniAuthBundle:Api:key' }
