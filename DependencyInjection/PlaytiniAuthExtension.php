@@ -8,7 +8,7 @@ use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-class AuthExtension extends Extension implements PrependExtensionInterface
+class PlaytiniAuthExtension extends Extension implements PrependExtensionInterface
 {
     /**
      * @param ContainerBuilder $container
@@ -29,7 +29,7 @@ class AuthExtension extends Extension implements PrependExtensionInterface
                     // Optional value for sending access_type parameter. More detail: https://developers.google.com/identity/protocols/OAuth2WebServer#offline
                     'access_type' => 'online',
                     // Optional value for sending hd parameter. More detail: https://developers.google.com/accounts/docs/OAuth2Login#hd-param
-                    //'hosted_domain' => 'yourdomain.com',
+                    'hosted_domain' => $container->getParameter('google_app_domain'),
                     // whether to check OAuth2 "state": defaults to true
                     'use_state' => false
                 ]
