@@ -2,20 +2,21 @@
 
 namespace Playtini\Tests\Bundle\AppBundle\DependencyInjection;
 
-use Playtini\Bundle\AuthBundle\DependencyInjection\AuthExtension;
+use Playtini\Bundle\AuthBundle\DependencyInjection\PlaytiniAuthExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * @covers \Playtini\Bundle\AuthBundle\DependencyInjection\AuthExtension
+ * @covers \Playtini\Bundle\AuthBundle\DependencyInjection\PlaytiniAuthExtension
  */
-class AuthExtensionTest extends \PHPUnit_Framework_TestCase
+class PlaytiniAuthExtensionTest extends \PHPUnit_Framework_TestCase
 {
     public function testPrepend()
     {
         $container = new ContainerBuilder();
         $container->setParameter('google_app_id', '123asd321');
         $container->setParameter('google_app_secret', 'asd123dsa');
-        $loader = new AuthExtension();
+        $container->setParameter('google_app_domain', 'playtini.ua');
+        $loader = new PlaytiniAuthExtension();
         $loader->prepend($container);
         $expected = [
             'clients' => [
@@ -26,7 +27,7 @@ class AuthExtensionTest extends \PHPUnit_Framework_TestCase
                     'redirect_route' => 'playtini_auth_connect_google_check',
                     'redirect_params' => [],
                     'access_type' => 'online',
-                    //'hosted_domain' => 'yourdomain.com',
+                    'hosted_domain' => 'playtini.ua',
                     'use_state' => false
                 ]
             ]
@@ -37,7 +38,7 @@ class AuthExtensionTest extends \PHPUnit_Framework_TestCase
     public function testLoad()
     {
         $container = new ContainerBuilder();
-        $loader = new AuthExtension();
+        $loader = new PlaytiniAuthExtension();
         $config = [];
         $loader->load([$config], $container);
 
