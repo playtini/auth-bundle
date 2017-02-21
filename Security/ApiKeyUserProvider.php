@@ -38,7 +38,7 @@ class ApiKeyUserProvider implements UserProviderInterface
 
     public function loadUserByUsername($username)
     {
-        $repository = $this->em->getRepository('AuthBundle:User');
+        $repository = $this->em->getRepository('PlaytiniAuthBundle:User');
 
         return $repository->findOneBy(['username' => $username]);
     }
