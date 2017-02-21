@@ -32,7 +32,8 @@ class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface
         return new PreAuthenticatedToken(
             'anon.',
             $apiKey,
-            $providerKey
+            $providerKey,
+            []
         );
     }
 
@@ -70,6 +71,8 @@ class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface
         }
 
         $user = $userProvider->loadUserByUsername($username);
+        // TODO: Set roles like in GoogleAuthenticator
+        $user->setRoles([User::ROLE_USER]);
 
         return new PreAuthenticatedToken(
             $user,
