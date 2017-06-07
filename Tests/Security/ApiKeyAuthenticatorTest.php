@@ -3,66 +3,55 @@
 namespace Playtini\Tests\Bundle\AppBundle\Security;
 
 use Playtini\Bundle\AuthBundle\Security\ApiKeyAuthenticator;
-use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 /**
  * @covers \Playtini\Bundle\AuthBundle\Security\ApiKeyAuthenticator
  */
 class ApiKeyAuthenticatorTest extends \PHPUnit_Framework_TestCase
 {
-    public function testCreateToken()
+    /** @var Request */
+    private $request;
+
+    /** @var ApiKeyAuthenticator */
+    private $authenticator;
+
+    protected function setUp()
     {
-        $request = $this->prophesize(Request::class);
-        $headers = $this->prophesize(ParameterBag::class);
-        $request->headers = $headers;
+        $this->request = new Request();
+        $this->authenticator = new ApiKeyAuthenticator();
+    }
 
-        $headers->get('X-Api-Key')->shouldBeCalledTimes(1)->willReturn('123');
+    public function testCreateToken(): void
+    {
+        $this->request->headers->set('X-Api-Key', '123');
 
-        $authenticator = new ApiKeyAuthenticator();
-        $token = $authenticator->createToken($request->reveal(), 'testkey');
+        $token = $this->authenticator->createToken($this->request, 'testkey');
 
         $this->assertInstanceOf(PreAuthenticatedToken::class, $token);
         $this->assertEquals('testkey', $token->getProviderKey());
         $this->assertEquals('123', $token->getCredentials());
     }
 
-    public function testCreateTokenRequest()
+    public function testCreateToken_Request()
     {
-        $request = $this->prophesize(Request::class);
-        $headers = $this->prophesize(ParameterBag::class);
-        $request->headers = $headers;
-        $requestRequest = $this->prophesize(ParameterBag::class);
-        $request->request = $requestRequest;
+        $this->request->request->set('apikey', '123');
 
-        $headers->get('X-Api-Key')->shouldBeCalledTimes(1)->willReturn(null);
-        $requestRequest->get('apikey')->shouldBeCalledTimes(1)->willReturn('123');
-
-        $authenticator = new ApiKeyAuthenticator();
-        $token = $authenticator->createToken($request->reveal(), 'testkey');
+        $token = $this->authenticator->createToken($this->request, 'testkey');
 
         $this->assertInstanceOf(PreAuthenticatedToken::class, $token);
         $this->assertEquals('testkey', $token->getProviderKey());
         $this->assertEquals('123', $token->getCredentials());
     }
 
-    public function testCreateTokenQuery()
+    public function testCreateToken_Query()
     {
-        $request = $this->prophesize(Request::class);
-        $headers = $this->prophesize(ParameterBag::class);
-        $request->headers = $headers;
-        $requestRequest = $this->prophesize(ParameterBag::class);
-        $request->request = $requestRequest;
-        $requestQuery = $this->prophesize(ParameterBag::class);
-        $request->query = $requestQuery;
+        $this->request->query->set('apikey', '123');
 
-        $headers->get('X-Api-Key')->shouldBeCalledTimes(1)->willReturn(null);
-        $requestRequest->get('apikey')->shouldBeCalledTimes(1)->willReturn(null);
-        $requestQuery->get('apikey')->shouldBeCalledTimes(1)->willReturn('123');
-
-        $authenticator = new ApiKeyAuthenticator();
-        $token = $authenticator->createToken($request->reveal(), 'testkey');
+        $token = $this->authenticator->createToken($this->request, 'testkey');
 
         $this->assertInstanceOf(PreAuthenticatedToken::class, $token);
         $this->assertEquals('testkey', $token->getProviderKey());
@@ -73,21 +62,20 @@ class ApiKeyAuthenticatorTest extends \PHPUnit_Framework_TestCase
      * @expectedException \Symfony\Component\Security\Core\Exception\BadCredentialsException
      * @expectedExceptionMessage No API key found
      */
-    public function testCreateTokenNoApiKey()
+    public function testCreateToken_NoApiKey(): void
     {
-        $request = $this->prophesize(Request::class);
-        $headers = $this->prophesize(ParameterBag::class);
-        $request->headers = $headers;
-        $requestRequest = $this->prophesize(ParameterBag::class);
-        $request->request = $requestRequest;
-        $requestQuery = $this->prophesize(ParameterBag::class);
-        $request->query = $requestQuery;
+        $this->authenticator->createToken($this->request, 'testkey');
+    }
 
-        $headers->get('X-Api-Key')->shouldBeCalledTimes(1)->willReturn(null);
-        $requestRequest->get('apikey')->shouldBeCalledTimes(1)->willReturn(null);
-        $requestQuery->get('apikey')->shouldBeCalledTimes(1)->willReturn(null);
+    public function testOnAuthenticationFailure(): void
+    {
+        $result = $this->authenticator->onAuthenticationFailure(new Request(), new AuthenticationException('Auth failure'));
 
-        $authenticator = new ApiKeyAuthenticator();
-        $authenticator->createToken($request->reveal(), 'testkey');
+        $expected = JsonResponse::create([
+            'code' => 401,
+            'message' => 'Auth failure'
+        ], 401);
+
+        $this->assertEquals($expected, $result);
     }
 }

@@ -11,11 +11,15 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
 
-class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface
+class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface, AuthenticationFailureHandlerInterface
 {
-    public function createToken(Request $request, $providerKey)
+    /**
+     * {@inheritdoc}
+     */
+    public function createToken(Request $request, $providerKey): PreAuthenticatedToken
     {
         $apiKey = $request->headers->get('X-Api-Key');
         if (!$apiKey) {
@@ -37,7 +41,10 @@ class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface
         );
     }
 
-    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey)
+    /**
+     * {@inheritdoc}
+     */
+    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey): PreAuthenticatedToken
     {
         if (!$userProvider instanceof ApiKeyUserProvider) {
             throw new \InvalidArgumentException(
@@ -82,16 +89,22 @@ class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface
         );
     }
 
-    public function supportsToken(TokenInterface $token, $providerKey)
+    /**
+     * {@inheritdoc}
+     */
+    public function supportsToken(TokenInterface $token, $providerKey): bool
     {
         return $token instanceof PreAuthenticatedToken && $token->getProviderKey() === $providerKey;
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
+    /**
+     * {@inheritdoc}
+     */
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): JsonResponse
     {
         return JsonResponse::create([
-            'key' => $exception->getMessageKey(),
-            'data' => $exception->getMessageData()
-        ], 403);
+            'code' => 401,
+            'message' => $exception->getMessage(),
+        ], 401);
     }
 }
