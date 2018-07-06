@@ -27,7 +27,7 @@ class GoogleController extends Controller
         $response = new Response();
         $response->headers->clearCookie('logout');
 
-        return $this->render('AuthBundle::login.html.twig', [
+        return $this->render('@PlaytiniAuth/login.html.twig', [
             'link' => $link
         ], $response);
     }
