@@ -56,7 +56,7 @@ class GoogleController extends Controller
      */
     public function forceLogoutAction()
     {
-        $response = new RedirectResponse($this->get('router')->generate('mailer_auth_security_logout'));
+        $response = new RedirectResponse($this->get('router')->generate('playtini_auth_security_logout'));
         $response->headers->setCookie(new Cookie('logout', 1, '+1 hour'));
 
         return $response;
